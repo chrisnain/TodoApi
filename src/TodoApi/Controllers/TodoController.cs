@@ -36,31 +36,72 @@ namespace TodoApi.Controllers
 			return new ObjectResult(item);
 		}
 
-		/*
-		// GET api/values/5
-		[HttpGet("{id}")]
-		public string Get(int id)
-		{
-			return "value";
-		}
-
-		// POST api/values
+		// POST api/todo
 		[HttpPost]
-		public void Post([FromBody]string value)
+		public IActionResult Create([FromBody] TodoItem item)
 		{
+			if (item == null)
+			{
+				return this.BadRequest();
+			}
+
+			this.TodoItems.Add(item);
+
+			return this.CreatedAtRoute("GetTodo", new { id = item.Key }, item);
 		}
 
-		// PUT api/values/5
+		// PUT api/todo/{id}
 		[HttpPut("{id}")]
-		public void Put(int id, [FromBody]string value)
+		public IActionResult Update(string id, [FromBody] TodoItem item)
 		{
+			if (item == null || item.Key != id)
+			{
+				return this.BadRequest();
+			}
+
+			var todo = this.TodoItems.Find(id);
+			if (todo == null)
+			{
+				return this.NotFound();
+			}
+
+			this.TodoItems.Update(item);
+			return new NoContentResult();
 		}
 
-		// DELETE api/values/5
-		[HttpDelete("{id}")]
-		public void Delete(int id)
+		// PATCH api/todo/{id}
+		[HttpPatch("{id}")]
+		public IActionResult Update([FromBody] TodoItem item, string id)
 		{
+			if (item == null)
+			{
+				return this.BadRequest();
+			}
+
+			var todo = this.TodoItems.Find(id);
+			if (todo == null)
+			{
+				return this.NotFound();
+			}
+
+			item.Key = todo.Key;
+
+			this.TodoItems.Update(item);
+			return new NoContentResult();
 		}
-		*/
+
+		// DELETE api/values/{id}
+		[HttpDelete("{id}")]
+		public IActionResult Delete(string id)
+		{
+			var todo = this.TodoItems.Find(id);
+			if (todo == null)
+			{
+				return this.NotFound();
+			}
+
+			this.TodoItems.Remove(id);
+			return new NoContentResult();
+		}
 	}
 }
